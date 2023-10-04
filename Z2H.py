@@ -121,7 +121,6 @@ class Head(nn.Module):
         self.value = nn.Linear(n_embd, head_size, bias=False)
         self.register_buffer('tril', torch.tril(torch.ones(block_size, block_size)))
 
-
     def forward(self, x):
         B,T,C = x.shape 
         k = self.key(x) # [B, T, C]
