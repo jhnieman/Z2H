@@ -160,6 +160,21 @@ class FeedForward(nn.Module):
     def forward(self, x):
         return self.net(x)
 
+class Block(nn.Module):
+    """ Tansformer block: communication followed by computation """
+
+    def __init__(self, n_embd, n_head):
+        # n_emdb: embedding dimension, n_head: the number of heads we'd like
+        super().__init__()
+        head_size = n_embd // n_head
+        self.sa = MultiHeadAttention(n_head, head_size)
+        self.ffwd = FeedForward(n_embd)
+
+    def forward(self, x):
+        x = self.sa(x)
+        x = self.ffwd(x)
+        return x
+
 # create a massive lookup for prediction, n x n. 
 # This will only use the character to predict, but not prior characters. This isn't too bad,
 # but clearly, there's more to do.
@@ -170,11 +185,19 @@ class BigramLanguageModel(nn.Module):
         # each token directly reads off the logits for the next token from a lookup table
         self.token_embedding_table = nn.Embedding(vocab_size, n_embd) 
         self.position_embedding_table = nn.Embedding(block_size, n_embd)
+
         # self.sa_head = Head(n_embd) # single head attention
         self.sa_heads = MultiHeadAttention(4, n_embd // 4) # ie, 4 heads of 8-dimension self-attention
         self.ffwd = FeedForward(n_embd)
 
-        # create a linear layaer at the head from embeddings to vocab size
+        # set up some self blocks
+        self.blocks = nn.Sequential(
+            Block(n_embd, n_head=4),
+            Block(n_embd, n_head=4),
+            Block(n_embd, n_head=4),
+        )
+
+        # create a linear layer at the head from embeddings to vocab size
         self.lm_head = nn.Linear(n_embd, vocab_size)
 
     def forward(self, idx, targets=None):
