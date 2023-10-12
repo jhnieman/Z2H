@@ -173,7 +173,6 @@ class BigramLanguageModel(nn.Module):
         # self.sa_head = Head(n_embd) # single head attention
         self.sa_heads = MultiHeadAttention(4, n_embd // 4) # ie, 4 heads of 8-dimension self-attention
         self.ffwd = FeedForward(n_embd)
-        self.lm_head = nn.Linear(n_embd, vocab_size)
 
         # create a linear layaer at the head from embeddings to vocab size
         self.lm_head = nn.Linear(n_embd, vocab_size)
