@@ -165,7 +165,7 @@ class FeedForward(nn.Module):
         return self.net(x)
 
 class Block(nn.Module):
-    """ Tansformer block: communication followed by computation """
+    """ Transformer block: communication followed by computation """
 
     def __init__(self, n_embd, n_head):
         # n_emdb: embedding dimension, n_head: the number of heads we'd like
