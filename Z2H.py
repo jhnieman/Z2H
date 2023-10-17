@@ -1,5 +1,7 @@
 import torch # we use PyTorch: https://pytorch.org
 import torch.nn as nn
+from datetime import datetime
+import os
 
 # hyper params
 batch_size = 64 # how many independent sequences will we process in parallel?
@@ -15,6 +17,7 @@ n_head = 6
 n_layer = 6
 dropout = 0.2
 
+output_dir = "./savedModels/"
 
 @torch.no_grad()
 def estimate_loss():
@@ -409,4 +412,10 @@ print(decode(m.generate(context, max_new_tokens=2000)[0].tolist()))
 
 # print the latest version (tokens increase = better)
 #print(decode(m.generate(idx = torch.zeros((1, 1), dtype=torch.long), max_new_tokens=500)[0].tolist()))
+
+
+# save the model to disk for later - using dict for fun
+datetime_detail = datetime.now().strftime("%d-%m-%Y-%H.%M.%S")
+outfile = os.path.join(output_dir, datetime_detail, ".pt")
+torch.save(m.state_dict(), outfile)
 
