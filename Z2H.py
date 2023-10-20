@@ -2,6 +2,7 @@ import torch # we use PyTorch: https://pytorch.org
 import torch.nn as nn
 from datetime import datetime
 import os
+from torch.nn import functional as F
 
 # hyper params
 batch_size = 64 # how many independent sequences will we process in parallel?
@@ -9,7 +10,7 @@ block_size = 256 # what is the maximum context length for predictions?
 max_iters = 5000
 eval_interval = 500
 learning_rate = 3e-4
-device = 'mps' if torch.backends.mps.is_available() else 'cpu'
+device = 'cpu' if torch.backends.mps.is_available() else 'cpu'
 print("device is" , device)
 eval_iters = 200
 n_embd = 384 # number of embeddings
@@ -114,7 +115,6 @@ print('----')
 # let's tensor it up
 print(xb) # our input to the transformer
 
-from torch.nn import functional as F
 torch.manual_seed(1337)
 
 # The head module!
@@ -352,6 +352,7 @@ class BigramLanguageModel(nn.Module):
 # Apparently this is a great language model choice
 model = BigramLanguageModel()
 m = model.to(device) # set the correct device for optimization!
+print("model moved to", device)
 
 # print the number of parameters in the model
 print(sum(p.numel() for p in m.parameters())/1e6, 'M parameters')
@@ -408,7 +409,7 @@ print(f"loss.item() = {loss.item()}")
 
 # generate from the model
 context = torch.zeros((1,1), dtype=torch.long, device=device)
-print(decode(m.generate(context, max_new_tokens=2000)[0].tolist()))
+print(decode(m.generate(context, max_new_tokens=3000)[0].tolist()))
 
 # print the latest version (tokens increase = better)
 #print(decode(m.generate(idx = torch.zeros((1, 1), dtype=torch.long), max_new_tokens=500)[0].tolist()))
@@ -416,6 +417,6 @@ print(decode(m.generate(context, max_new_tokens=2000)[0].tolist()))
 
 # save the model to disk for later - using dict for fun
 datetime_detail = datetime.now().strftime("%d-%m-%Y-%H.%M.%S")
-outfile = os.path.join(output_dir, datetime_detail, ".pt")
+outfile = os.path.join(output_dir, datetime_detail + ".pt")
 torch.save(m.state_dict(), outfile)
 
